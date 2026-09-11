@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>カレーライスをつくろう｜てじゅんカードならべ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF7E9;
+    --pot:#5B3A29;
+    --pot-light:#8B5E3C;
+    --curry:#D99A2B;
+    --curry-dark:#B87A1B;
+    --carrot:#E2793D;
+    --sage:#7C9A5C;
+    --ok:#4E8C55;
+    --ok-bg:#E7F4E5;
+    --ng:#C85A4A;
+    --ng-bg:#FBE9E5;
+    --ink:#40311F;
+    --paper:#FFFFFF;
+    --shadow: 0 4px 0 rgba(91,58,41,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 8% 8%, rgba(217,154,43,0.15), transparent 40%),
+      radial-gradient(circle at 95% 90%, rgba(124,154,92,0.15), transparent 40%),
+      var(--cream);
+    font-family:"M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    padding:20px 14px 60px;
+  }
+  .app{max-width:920px;margin:0 auto;}
+
+  header{text-align:center;margin-bottom:22px;}
+  .pot-icon{font-size:52px;line-height:1;display:inline-block;}
+  h1{
+    font-size:clamp(22px,4.5vw,32px);
+    font-weight:800;
+    color:var(--pot);
+    margin:6px 0 4px;
+  }
+  .subtitle{
+    font-size:clamp(14px,2.6vw,17px);
+    font-weight:500;
+    color:var(--pot-light);
+    margin:0;
+  }
+
+  .legend{
+    display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+    margin:18px 0 6px;
+  }
+  .legend span{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13px;font-weight:700;color:var(--ink);
+    background:var(--paper);border-radius:999px;
+    padding:5px 12px 5px 8px;
+    box-shadow:0 2px 0 rgba(91,58,41,0.12);
+  }
+  .dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
+  .dot.prep{background:var(--sage);}
+  .dot.cut{background:var(--carrot);}
+  .dot.cook{background:var(--curry-dark);}
+  .dot.serve{background:var(--pot-light);}
+
+  section.block{
+    background:var(--paper);
+    border-radius:20px;
+    padding:16px 16px 20px;
+    margin-top:18px;
+    box-shadow:var(--shadow);
+    border:2px solid rgba(91,58,41,0.08);
+  }
+  .block-title{
+    font-size:clamp(16px,3vw,19px);
+    font-weight:800;
+    color:var(--pot);
+    margin:0 0 12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .badge{
+    background:var(--curry);color:#fff;border-radius:50%;
+    width:28px;height:28px;flex:0 0 28px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;
+  }
+
+  /* --- pool --- */
+  #pool{
+    display:flex;flex-wrap:wrap;gap:10px;
+    min-height:70px;
+    align-items:flex-start;
+  }
+  #pool:empty::after{
+    content:"ぜんぶ ならべたね！したの「こたえあわせ」を おそう";
+    color:var(--sage);font-weight:700;font-size:14px;
+  }
+  .card{
+    display:flex;align-items:center;gap:10px;
+    background:var(--paper);
+    border-radius:16px;
+    padding:12px 16px;
+    font-size:16px;font-weight:700;
+    cursor:pointer;
+    border-left:8px solid var(--sage);
+    box-shadow:0 3px 0 rgba(0,0,0,0.08);
+    transition:transform .12s ease;
+    user-select:none;
+    min-height:44px;
+  }
+  .card:hover{transform:translateY(-2px);}
+  .card:active{transform:translateY(1px);}
+  .card .emoji{font-size:26px;}
+  .card.cat-prep{border-left-color:var(--sage);}
+  .card.cat-cut{border-left-color:var(--carrot);}
+  .card.cat-cook{border-left-color:var(--curry-dark);}
+  .card.cat-serve{border-left-color:var(--pot-light);}
+
+  /* --- slots --- */
+  #slots{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+    gap:10px;
+  }
+  .slot{
+    position:relative;
+    min-height:78px;
+    border-radius:16px;
+    border:3px dashed rgba(91,58,41,0.3);
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(217,154,43,0.06);
+    padding:6px;
+  }
+  .slot .num{
+    position:absolute;top:6px;left:8px;
+    font-size:12px;font-weight:800;color:rgba(91,58,41,0.45);
+  }
+  .slot.filled{
+    border-style:solid;
+    background:var(--paper);
+    cursor:pointer;
+  }
+  .slot.correct{
+    border-color:var(--ok);
+    background:var(--ok-bg);
+    cursor:default;
+  }
+  .slot.incorrect{
+    border-color:var(--ng);
+    background:var(--ng-bg);
+  }
+  .slot .card{box-shadow:none;padding:8px 10px;font-size:14px;width:100%;justify-content:center;text-align:center;flex-direction:column;gap:4px;}
+  .slot .card .emoji{font-size:24px;}
+  .mark{position:absolute;top:4px;right:8px;font-size:18px;}
+
+  /* --- controls --- */
+  .controls{
+    display:flex;flex-wrap:wrap;gap:12px;justify-content:center;
+    margin-top:22px;
+  }
+  button.main-btn{
+    font-family:inherit;
+    font-size:17px;font-weight:800;
+    border:none;border-radius:999px;
+    padding:14px 28px;
+    cursor:pointer;
+    color:#fff;
+    box-shadow:0 4px 0 rgba(0,0,0,0.15);
+  }
+  button.main-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,0.15);}
+  #checkBtn{background:var(--curry-dark);}
+  #resetBtn{background:var(--pot-light);}
+
+  #result{
+    text-align:center;font-size:18px;font-weight:800;
+    margin-top:16px;min-height:28px;color:var(--pot);
+  }
+  #result.celebrate{color:var(--ok);font-size:22px;}
+
+  .teacher{
+    margin-top:26px;text-align:center;
+  }
+  .teacher summary{
+    display:inline-block;cursor:pointer;
+    font-size:13px;color:rgba(91,58,41,0.55);
+    font-weight:700;
+  }
+  .teacher-panel{
+    margin-top:10px;background:var(--paper);
+    border-radius:14px;padding:14px 18px;
+    text-align:left;max-width:480px;margin-left:auto;margin-right:auto;
+    box-shadow:var(--shadow);
+    font-size:14px;line-height:1.9;
+  }
+  .teacher-panel ol{margin:0;padding-left:20px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="pot-icon">🍛</div>
+    <h1>カレーライスをつくろう</h1>
+    <p class="subtitle">カードをタップして、つくる じゅんばんに ならべよう</p>
+  </header>
+
+  <div class="legend">
+    <span><i class="dot prep"></i>じゅんび</span>
+    <span><i class="dot cut"></i>したごしらえ</span>
+    <span><i class="dot cook"></i>ちょうり</span>
+    <span><i class="dot serve"></i>もりつけ</span>
+  </div>
+
+  <section class="block">
+    <p class="block-title"><span class="badge">1</span>カードをえらぶ</p>
+    <div id="pool"></div>
+  </section>
+
+  <section class="block">
+    <p class="block-title"><span class="badge">2</span>じゅんばんに ならべる</p>
+    <div id="slots"></div>
+  </section>
+
+  <div class="controls">
+    <button id="checkBtn" class="main-btn">こたえあわせ</button>
+    <button id="resetBtn" class="main-btn">はじめから</button>
+  </div>
+
+  <div id="result"></div>
+
+  <details class="teacher">
+    <summary>先生用：正解の じゅんばんを見る</summary>
+    <div class="teacher-panel">
+      <ol id="answerList"></ol>
+    </div>
+  </details>
+</div>
+
+<script>
+const STEPS = [
+  {emoji:"🧼", text:"手を あらう", cat:"prep"},
+  {emoji:"🥕🥩🍚", text:"ざいりょうを 用意する", cat:"prep"},
+  {emoji:"🥔🔪", text:"やさいを あらって 切る", cat:"cut"},
+  {emoji:"🍚🚿", text:"お米を といで たく", cat:"cut"},
+  {emoji:"🍳", text:"なべに油を入れて お肉と やさいを いためる", cat:"cook"},
+  {emoji:"💧🍲", text:"水を 入れて 煮る", cat:"cook"},
+  {emoji:"🟫", text:"やわらかくなったら ルウを 入れる", cat:"cook"},
+  {emoji:"♨️", text:"とろみが つくまで 煮こむ", cat:"cook"},
+  {emoji:"🍽️", text:"お皿に ご飯を もって カレーをかける", cat:"serve"},
+  {emoji:"🎉", text:"できあがり！ いただきます", cat:"serve"},
+];
+
+// 順番を入れ替えても正解にしたいステップをまとめる（例：野菜を切る／お米を炊く はどちらが先でもOK）
+const GROUPS = [
+  [0],
+  [1],
+  [2,3],
+  [4],
+  [5],
+  [6],
+  [7],
+  [8],
+  [9],
+];
+
+// 各スロット位置(0〜9)がどのグループに対応するかを事前計算
+const SLOT_GROUP_INDEX = [];
+GROUPS.forEach((group, gi)=>{
+  group.forEach(()=> SLOT_GROUP_INDEX.push(gi));
+});
+// 各ステップがどのグループに属するかの逆引き
+const STEP_GROUP_INDEX = new Array(STEPS.length);
+GROUPS.forEach((group, gi)=>{
+  group.forEach(stepIndex=> STEP_GROUP_INDEX[stepIndex] = gi);
+});
+
+let pool = [];
+let slots = new Array(STEPS.length).fill(null); // each: {stepIndex, status: null|'correct'|'incorrect'}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function init(){
+  pool = shuffle(STEPS.map((s,i)=>i));
+  slots = new Array(STEPS.length).fill(null);
+  document.getElementById('result').textContent = '';
+  document.getElementById('result').className = '';
+  render();
+}
+
+function makeCardEl(stepIndex, onClick){
+  const s = STEPS[stepIndex];
+  const el = document.createElement('div');
+  el.className = 'card cat-' + s.cat;
+  el.innerHTML = `<span class="emoji">${s.emoji}</span><span>${s.text}</span>`;
+  el.addEventListener('click', onClick);
+  return el;
+}
+
+function render(){
+  const poolEl = document.getElementById('pool');
+  poolEl.innerHTML = '';
+  pool.forEach(stepIndex=>{
+    const card = makeCardEl(stepIndex, ()=>placeCard(stepIndex));
+    poolEl.appendChild(card);
+  });
+
+  const slotsEl = document.getElementById('slots');
+  slotsEl.innerHTML = '';
+  slots.forEach((slot, i)=>{
+    const slotEl = document.createElement('div');
+    slotEl.className = 'slot' + (slot? ' filled':'') + (slot && slot.status ? ' '+slot.status : '');
+    const num = document.createElement('div');
+    num.className = 'num';
+    num.textContent = (i+1);
+    slotEl.appendChild(num);
+
+    if(slot){
+      const card = makeCardEl(slot.stepIndex, ()=>{
+        if(slot.status === 'correct') return; // ロックされていて動かせない
+        removeFromSlot(i);
+      });
+      slotEl.appendChild(card);
+      if(slot.status === 'correct'){
+        const mark = document.createElement('span');
+        mark.className = 'mark'; mark.textContent='⭕';
+        slotEl.appendChild(mark);
+      } else if(slot.status === 'incorrect'){
+        const mark = document.createElement('span');
+        mark.className = 'mark'; mark.textContent='✖️';
+        slotEl.appendChild(mark);
+      }
+    }
+    slotsEl.appendChild(slotEl);
+  });
+}
+
+function placeCard(stepIndex){
+  const emptyIndex = slots.findIndex(s=>s===null);
+  if(emptyIndex === -1) return;
+  slots[emptyIndex] = {stepIndex, status:null};
+  pool = pool.filter(i=>i!==stepIndex);
+  render();
+}
+
+function removeFromSlot(slotIndex){
+  const slot = slots[slotIndex];
+  if(!slot) return;
+  pool.push(slot.stepIndex);
+  slots[slotIndex] = null;
+  render();
+}
+
+function checkAnswer(){
+  let filledCount = 0, correctCount = 0;
+  slots.forEach((slot, i)=>{
+    if(!slot) return;
+    filledCount++;
+    if(STEP_GROUP_INDEX[slot.stepIndex] === SLOT_GROUP_INDEX[i]){
+      slot.status = 'correct';
+      correctCount++;
+    } else {
+      slot.status = 'incorrect';
+    }
+  });
+  render();
+
+  const resultEl = document.getElementById('result');
+  if(filledCount === 0){
+    resultEl.textContent = 'まずは カードを ならべてみよう';
+    resultEl.className = '';
+    return;
+  }
+  if(correctCount === STEPS.length){
+    resultEl.textContent = '🎉 ぜんぶ せいかい！ よくできました！';
+    resultEl.className = 'celebrate';
+  } else {
+    resultEl.textContent = `${filledCount}こ中 ${correctCount}こ せいかい。赤いカードを もういちど やってみよう`;
+    resultEl.className = '';
+  }
+}
+
+document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+document.getElementById('resetBtn').addEventListener('click', init);
+
+const answerListEl = document.getElementById('answerList');
+GROUPS.forEach(group=>{
+  const li = document.createElement('li');
+  if(group.length === 1){
+    const s = STEPS[group[0]];
+    li.textContent = `${s.emoji} ${s.text}`;
+  } else {
+    const texts = group.map(idx=>`${STEPS[idx].emoji} ${STEPS[idx].text}`).join('　／　');
+    li.textContent = texts + '　（順番はどちらが先でもOK）';
+  }
+  answerListEl.appendChild(li);
+});
+
+init();
+</script>
+</body>
+</html>
